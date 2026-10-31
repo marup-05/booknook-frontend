@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectFade, Keyboard, Navigation, Pagination } from "swiper/modules";
-import type { Swiper as SwiperClass, SwiperOptions } from "swiper/types";    
+import type { Swiper as SwiperClass, SwiperOptions } from "swiper/types";       
 import "swiper/css/bundle";
 
 import { cn } from "cn";
