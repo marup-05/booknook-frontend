@@ -5,7 +5,7 @@ export default function CtaBanner() {
     <section className="container-page pb-20">
       <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-emerald-950 via-emerald-900 to-teal-700 px-6 py-16 text-center md:px-16 md:py-20">
         <div
-          aria-hidden="true"
+          aria-hidden="true"     
           className="absolute inset-0"
           style={{
             backgroundImage:
