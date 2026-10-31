@@ -4,7 +4,7 @@ import Logo from "@/components/logo";
 import CurrentYear from "@/components/current-year";
 import { BOOK_CATEGORIES, NAV_LINKS } from "@/lib/site";
 
-export default function Footer() {
+export default function Footer() {   
   return (
     <footer className="border-t border-stone-900 bg-stone-950 text-stone-300">
       <div className="container-page py-12 lg:py-16">
