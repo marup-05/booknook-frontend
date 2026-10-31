@@ -126,11 +126,11 @@ export default async function BooksPage() {
                           ? "text-emerald-700"
                           : "text-red-600"
                       }`}>
-                        {book.availableCopies > 0
-                          ? `${book.availableCopies} Copies`
+                        {book.availableCopies > 0    
+                          ? `${book.availableCopies} Copies`    
                           : "Currently Unavailable"}
                       </p>
-                    </div>
+                    </div>    
 
                     <span className="text-xs text-[#928879]">
                       Total: {book.totalCopies}
