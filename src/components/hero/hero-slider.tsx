@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";   
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectFade, Keyboard, Navigation, Pagination } from "swiper/modules";
-import type { Swiper as SwiperClass, SwiperOptions } from "swiper/types";       
+import {
+  Autoplay,
+  EffectFade,
+  Keyboard,
+  Navigation,
+  Pagination,
+} from "swiper/modules";
+
 import "swiper/css/bundle";
 
 import { cn } from "cn";
@@ -14,8 +19,10 @@ type Slide = {
   id: string;
   eyebrow: string;
   title: string;
-  image: { src: string; alt: string };
-  /** Tailwind gradient classes layered over the photo for text readability */
+  image: {
+    src: string;
+    alt: string;
+  };
   overlay: string;
 };
 
@@ -28,7 +35,8 @@ const SLIDES: Slide[] = [
       src: "/images/hero-books.jpg",
       alt: "A cozy library aisle lined with books under warm hanging lights",
     },
-    overlay: "bg-linear-to-t from-stone-950/90 via-stone-950/45 to-stone-950/25",
+    overlay:
+      "bg-linear-to-t from-stone-950/90 via-stone-950/45 to-stone-950/25",
   },
   {
     id: "arrivals",
@@ -38,7 +46,8 @@ const SLIDES: Slide[] = [
       src: "/images/hero-cozy.jpg",
       alt: "A colourful stack of freshly arrived hardcover books",
     },
-    overlay: "bg-linear-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20",
+    overlay:
+      "bg-linear-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20",
   },
   {
     id: "shelves",
@@ -48,70 +57,47 @@ const SLIDES: Slide[] = [
       src: "/images/hero-library.jpg",
       alt: "Wall-to-wall wooden shelves packed with classic books",
     },
-    overlay: "bg-linear-to-t from-stone-950/90 via-stone-950/45 to-stone-950/25",
+    overlay:
+      "bg-linear-to-t from-stone-950/90 via-stone-950/45 to-stone-950/25",
   },
 ];
 
-const SWIPER_CONFIG: SwiperOptions = {
-  modules: [EffectFade, Navigation, Pagination, Keyboard],
-};
-
-const AUTOPLAY_DELAY_MS = 4500;
-const AUTOPLAY_SPEED = 900;
+const AUTOPLAY_DELAY_MS = 3000;
+const AUTOPLAY_SPEED = 700;
 
 export default function HeroSlider() {
-  const [swiper, setSwiper] = useState<SwiperClass | null>(null);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    if (!swiper || swiper.destroyed) return;
-
-    const id = window.setInterval(() => {
-      if (
-        !pausedRef.current &&
-        document.visibilityState === "visible" &&
-        !swiper.destroyed &&
-        swiper.initialized
-      ) {
-        swiper.slideNext(AUTOPLAY_SPEED);
-      }
-    }, AUTOPLAY_DELAY_MS);
-
-    return () => {
-      window.clearInterval(id);
-    };
-  }, [swiper]);
-
   return (
-    <section
-      aria-label="Featured highlights"
-      className="relative"
-      onMouseEnter={() => {
-        pausedRef.current = true;
-      }}
-      onMouseLeave={() => {
-        pausedRef.current = false;
-      }}
-    >
+    <section aria-label="Featured highlights" className="relative">
       <Swiper
-        {...SWIPER_CONFIG}
+        modules={[Autoplay, EffectFade, Navigation, Pagination, Keyboard]}
         className="hero-swiper h-full"
         effect="fade"
-        fadeEffect={{ crossFade: true }}
+        fadeEffect={{
+          crossFade: true,
+        }}
         speed={AUTOPLAY_SPEED}
         loop
-        keyboard={{ enabled: true }}
-        pagination={{ clickable: true }}
+        autoplay={{
+          delay: AUTOPLAY_DELAY_MS,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+          waitForTransition: true,
+        }}
+        keyboard={{
+          enabled: true,
+        }}
+        pagination={{
+          clickable: true,
+        }}
         navigation={{
           prevEl: ".hero-swiper-prev",
           nextEl: ".hero-swiper-next",
         }}
-        onSwiper={setSwiper}
       >
         {SLIDES.map((slide, index) => (
           <SwiperSlide key={slide.id}>
             <div className="relative overflow-hidden bg-stone-950">
-              {/* Full-bleed photo, properly fitted */}
+              {/* Background image */}
               <Image
                 src={slide.image.src}
                 alt={slide.image.alt}
@@ -121,7 +107,7 @@ export default function HeroSlider() {
                 className="object-cover object-center"
               />
 
-              {/* Readability gradient over the photo */}
+              {/* Readability gradient */}
               <div
                 aria-hidden="true"
                 className={cn("absolute inset-0", slide.overlay)}
@@ -142,6 +128,7 @@ export default function HeroSlider() {
                   className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber-500 px-7 text-sm font-semibold text-stone-950 shadow-lg shadow-amber-950/40 transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
                 >
                   Browse Books
+
                   <svg
                     className="size-4"
                     viewBox="0 0 24 24"
@@ -161,6 +148,7 @@ export default function HeroSlider() {
           </SwiperSlide>
         ))}
 
+        {/* Previous button */}
         <button
           type="button"
           aria-label="Previous slide"
@@ -180,6 +168,7 @@ export default function HeroSlider() {
           </svg>
         </button>
 
+        {/* Next button */}
         <button
           type="button"
           aria-label="Next slide"

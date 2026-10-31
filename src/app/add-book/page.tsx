@@ -1,14 +1,83 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { CirclePlus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CirclePlus, Trash2, Loader2 } from "lucide-react";
+
 import PageHeader from "@/components/page-header";
 import { ALL_CATEGORIES } from "@/lib/site";
 
 const FIELD_CLASSES =
   "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/50 focus:outline-none";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function AddBookPage() {
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setLoading(true);
+    setError("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const totalCopies = Number(formData.get("totalCopies"));
+    const rating = Number(formData.get("rating") || 0);
+
+    const bookData = {
+      title: String(formData.get("title")).trim(),
+      author: String(formData.get("author")).trim(),
+      category: String(formData.get("category")),
+      imageUrl: String(formData.get("imageUrl")).trim(),
+      rating,
+      totalCopies,
+      availableCopies: totalCopies,
+      description: String(formData.get("description")).trim(),
+
+      // Temporary values until Better Auth is connected
+      addedByName: "Rahman Marup",
+      addedByEmail: "rahmanmarup05@gmail.com",
+    };
+
+    try {
+      if (!API_URL) {
+        throw new Error("API URL is not configured.");
+      }
+
+      const response = await fetch(`${API_URL}/add-book`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add book. Please try again.");
+      }
+
+      router.push("/books");
+      router.refresh();
+    } catch (err) {
+      console.error("Add book error:", err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
+
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -18,12 +87,13 @@ export default function AddBookPage() {
       />
 
       <div className="container-page grid gap-10 py-12 md:py-16 lg:grid-cols-[1fr_20rem]">
-        {/* Form (static placeholder) */}
+        {/* Add Book Form */}
         <form
           className="rounded-3xl border border-border/70 bg-card p-6 sm:p-8"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
         >
           <div className="grid gap-5 sm:grid-cols-2">
+            {/* Book Title */}
             <div className="sm:col-span-2">
               <label
                 htmlFor="title"
@@ -31,16 +101,19 @@ export default function AddBookPage() {
               >
                 Book title <span className="text-amber-700">*</span>
               </label>
+
               <input
                 id="title"
                 name="title"
                 type="text"
                 required
+                minLength={2}
                 placeholder="e.g. The Midnight Library"
                 className={FIELD_CLASSES}
               />
             </div>
 
+            {/* Author */}
             <div>
               <label
                 htmlFor="author"
@@ -48,6 +121,7 @@ export default function AddBookPage() {
               >
                 Author name <span className="text-amber-700">*</span>
               </label>
+
               <input
                 id="author"
                 name="author"
@@ -58,6 +132,7 @@ export default function AddBookPage() {
               />
             </div>
 
+            {/* Category */}
             <div>
               <label
                 htmlFor="category"
@@ -65,6 +140,7 @@ export default function AddBookPage() {
               >
                 Category <span className="text-amber-700">*</span>
               </label>
+
               <select
                 id="category"
                 name="category"
@@ -73,31 +149,37 @@ export default function AddBookPage() {
                 className={FIELD_CLASSES}
               >
                 {ALL_CATEGORIES.map((category) => (
-                  <option key={category}>{category}</option>
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </select>
             </div>
 
+            {/* Cover Image */}
             <div className="sm:col-span-2">
               <label
-                htmlFor="cover"
+                htmlFor="imageUrl"
                 className="mb-1.5 block text-sm font-medium text-foreground"
               >
-                Cover image URL
+                Cover image URL <span className="text-amber-700">*</span>
               </label>
+
               <input
-                id="cover"
-                name="cover"
+                id="imageUrl"
+                name="imageUrl"
                 type="url"
-                placeholder="https://…"
+                required
+                placeholder="https://example.com/book-cover.jpg"
                 className={FIELD_CLASSES}
               />
+
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Paste a link to the cover image. Leave empty to use a generated
-                placeholder cover.
+                Paste a valid link to the book cover image.
               </p>
             </div>
 
+            {/* Rating */}
             <div>
               <label
                 htmlFor="rating"
@@ -105,6 +187,7 @@ export default function AddBookPage() {
               >
                 Rating (0–5)
               </label>
+
               <input
                 id="rating"
                 name="rating"
@@ -112,75 +195,108 @@ export default function AddBookPage() {
                 min={0}
                 max={5}
                 step="0.1"
+                defaultValue={0}
                 placeholder="4.5"
                 className={FIELD_CLASSES}
               />
             </div>
 
+            {/* Total Copies */}
             <div>
               <label
-                htmlFor="pages"
+                htmlFor="totalCopies"
                 className="mb-1.5 block text-sm font-medium text-foreground"
               >
-                Total Copies 
+                Total Copies <span className="text-amber-700">*</span>
               </label>
+
               <input
-                id="pages"
-                name="pages"
+                id="totalCopies"
+                name="totalCopies"
                 type="number"
                 min={1}
-                placeholder="3"
+                step={1}
+                required
+                placeholder="e.g. 5"
                 className={FIELD_CLASSES}
               />
             </div>
 
+            {/* Description */}
             <div className="sm:col-span-2">
               <label
-                htmlFor="summary"
+                htmlFor="description"
                 className="mb-1.5 block text-sm font-medium text-foreground"
               >
                 Short summary <span className="text-amber-700">*</span>
               </label>
+
               <textarea
-                id="summary"
-                name="summary"
+                id="description"
+                name="description"
                 required
+                minLength={10}
                 rows={5}
-                placeholder="A couple of sentences about the book…"
+                placeholder="Write a short description about the book..."
                 className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/50 focus:outline-none"
               />
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <p
+              role="alert"
+              className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600"
+            >
+              {error}
+            </p>
+          )}
+
+          {/* Form Buttons */}
           <div className="mt-8 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="reset"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              disabled={loading}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 className="size-4" aria-hidden="true" />
               Clear form
             </button>
+
             <button
               type="submit"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-amber-500 px-6 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400"
+              disabled={loading}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-amber-500 px-6 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <CirclePlus className="size-4" aria-hidden="true" />
-              Add to shelves
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Adding Book...
+                </>
+              ) : (
+                <>
+                  <CirclePlus className="size-4" aria-hidden="true" />
+                  Add to shelves
+                </>
+              )}
             </button>
           </div>
         </form>
 
-        {/* Tips sidebar */}
+        {/* Tips Sidebar */}
         <aside className="space-y-4">
           <div className="rounded-3xl border border-border/70 bg-linear-to-b from-secondary/60 to-card p-6">
             <h2 className="font-serif text-xl font-semibold text-foreground">
               Tips for a great listing
             </h2>
+
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               {[
-                "Use clean metadata: correct title, author and category help readers find your book.",
-                "A crisp cover image renders beautifully in the library grid.",
-                "Keep summaries short — three sentences is plenty.",
+                "Use the correct book title, author and category.",
+                "Add a valid cover image URL for a beautiful book card.",
+                "Keep the book summary short and informative.",
+                "Enter the correct number of available copies.",
               ].map((tip) => (
                 <li key={tip} className="flex gap-2.5">
                   <span
@@ -195,7 +311,6 @@ export default function AddBookPage() {
 
           <div className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-6">
             <p className="text-sm leading-relaxed text-foreground">
-              {" "}
               Need to check something first?{" "}
               <Link
                 href="/books"
