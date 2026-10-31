@@ -1,4 +1,4 @@
-import HeroSlider from "@/components/hero/hero-slider";
+import HeroSlider from "@/components/hero/hero-slider-loader";
 import NewArrivals from "@/components/home/new-arrivals";
 import BookCategories from "@/components/home/book-categories";
 import CtaBanner from "@/components/home/cta-banner";

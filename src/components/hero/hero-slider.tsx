@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,7 +6,6 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   Autoplay,
-  EffectFade,
   Keyboard,
   Navigation,
   Pagination,
@@ -69,12 +69,9 @@ export default function HeroSlider() {
   return (
     <section aria-label="Featured highlights" className="relative">
       <Swiper
-        modules={[Autoplay, EffectFade, Navigation, Pagination, Keyboard]}
+        modules={[Autoplay, Navigation, Pagination, Keyboard]}
         className="hero-swiper h-full"
-        effect="fade"
-        fadeEffect={{
-          crossFade: true,
-        }}
+        effect="slide"
         speed={AUTOPLAY_SPEED}
         loop
         autoplay={{
@@ -82,6 +79,7 @@ export default function HeroSlider() {
           disableOnInteraction: false,
           pauseOnMouseEnter: true,
           waitForTransition: true,
+          reverseDirection: false,
         }}
         keyboard={{
           enabled: true,
