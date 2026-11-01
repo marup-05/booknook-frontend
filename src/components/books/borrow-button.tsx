@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { BookCheck, Ban, Loader2, X } from "lucide-react";
 
 type BorrowButtonProps = {
@@ -22,17 +23,12 @@ export default function BorrowButton({
   const [email, setEmail] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const unavailable = availableCopies <= 0;
 
   const handleBorrow = async () => {
-    setMessage("");
-    setSuccess(false);
-
     if (!name.trim() || !email.trim()) {
-      setMessage("Please enter your name and email.");
+      toast.error("Please enter your name and email.");
       return;
     }
 
@@ -53,12 +49,23 @@ export default function BorrowButton({
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Something went wrong.");
+        const errorMessage = data.message || "Something went wrong.";
+
+        // Duplicate borrow check
+        if (
+          response.status === 409 ||
+          errorMessage.toLowerCase().includes("already borrowed")
+        ) {
+          toast.warning("You have already borrowed this book with this email!");
+        } else {
+          toast.error(errorMessage);
+        }
+
         return;
       }
 
-      setSuccess(true);
-      setMessage("Book borrowed successfully!");
+      toast.success("Book borrowed successfully!");
+
       setName("");
       setEmail("");
       setShowForm(false);
@@ -66,7 +73,7 @@ export default function BorrowButton({
       router.refresh();
     } catch (error) {
       console.error("Borrow failed:", error);
-      setMessage("Unable to connect to the server. Please try again.");
+      toast.error("Unable to connect to the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -94,10 +101,7 @@ export default function BorrowButton({
 
       {!showForm ? (
         <button
-          onClick={() => {
-            setShowForm(true);
-            setMessage("");
-          }}
+          onClick={() => setShowForm(true)}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
         >
           <BookCheck size={18} />
@@ -172,18 +176,6 @@ export default function BorrowButton({
             )}
           </button>
         </div>
-      )}
-
-      {message && (
-        <p
-          className={`rounded-lg px-3 py-2.5 text-sm ${
-            success
-              ? "bg-green-50 text-green-700"
-              : "bg-red-50 text-red-700"
-          }`}
-        >
-          {message}
-        </p>
       )}
     </div>
   );

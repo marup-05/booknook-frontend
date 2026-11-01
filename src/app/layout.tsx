@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
