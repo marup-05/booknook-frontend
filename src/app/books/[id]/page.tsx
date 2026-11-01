@@ -16,8 +16,7 @@ import {
 
 import BorrowButton from "@/components/books/borrow-button";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Book = {
   _id: string;
@@ -31,7 +30,7 @@ type Book = {
   description: string;
   addedByName?: string;
   addedByEmail?: string;
-  createdAt?: string;
+  createdAt?: string | Date;
 };
 
 async function getBook(id: string): Promise<Book | null> {
@@ -55,7 +54,12 @@ async function getBook(id: string): Promise<Book | null> {
   }
 }
 
-async function BookDetailsContent({ id }: { id: string }) {
+async function BookDetailsContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const book = await getBook(id);
 
   if (!book) {
@@ -137,7 +141,10 @@ async function BookDetailsContent({ id }: { id: string }) {
               </h1>
 
               <p className="mb-7 text-lg text-stone-500">
-                by <span className="font-semibold text-stone-800">{book.author}</span>
+                by{" "}
+                <span className="font-semibold text-stone-800">
+                  {book.author}
+                </span>
               </p>
 
               <div className="mb-8 h-px bg-stone-200" />
@@ -150,7 +157,8 @@ async function BookDetailsContent({ id }: { id: string }) {
                 </h2>
 
                 <p className="text-sm leading-7 text-stone-600 sm:text-base">
-                  {book.description || "No description available for this book."}
+                  {book.description ||
+                    "No description available for this book."}
                 </p>
               </div>
 
@@ -163,9 +171,11 @@ async function BookDetailsContent({ id }: { id: string }) {
                       Copies Left
                     </span>
                   </div>
+
                   <p className="text-3xl font-bold text-stone-900">
                     {book.availableCopies}
                   </p>
+
                   <p className="mt-1 text-xs text-stone-500">
                     {book.availableCopies === 1
                       ? "Last copy available"
@@ -180,9 +190,11 @@ async function BookDetailsContent({ id }: { id: string }) {
                       Total Copies
                     </span>
                   </div>
+
                   <p className="text-3xl font-bold text-stone-900">
                     {book.totalCopies}
                   </p>
+
                   <p className="mt-1 text-xs text-stone-500">
                     Total library stock
                   </p>
@@ -200,6 +212,7 @@ async function BookDetailsContent({ id }: { id: string }) {
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-amber-700">
                       <UserRound size={18} />
                     </div>
+
                     <div>
                       <p className="text-xs text-stone-500">Name</p>
                       <p className="text-sm font-semibold text-stone-800">
@@ -212,6 +225,7 @@ async function BookDetailsContent({ id }: { id: string }) {
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-amber-700">
                       <Mail size={18} />
                     </div>
+
                     <div className="min-w-0">
                       <p className="text-xs text-stone-500">Email</p>
                       <p className="break-all text-sm font-semibold text-stone-800">
@@ -225,6 +239,7 @@ async function BookDetailsContent({ id }: { id: string }) {
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-amber-700">
                         <CalendarDays size={18} />
                       </div>
+
                       <div>
                         <p className="text-xs text-stone-500">Date Added</p>
                         <p className="text-sm font-semibold text-stone-800">
@@ -269,13 +284,11 @@ async function BookDetailsContent({ id }: { id: string }) {
   );
 }
 
-export default async function BookDetailsPage({
+export default function BookDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-
   return (
     <Suspense
       fallback={
@@ -289,7 +302,7 @@ export default async function BookDetailsPage({
         </div>
       }
     >
-      <BookDetailsContent id={id} />
+      <BookDetailsContent params={params} />
     </Suspense>
   );
 }

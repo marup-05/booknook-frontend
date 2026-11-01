@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogIn, Menu, X } from "lucide-react";
@@ -8,7 +8,7 @@ import Logo from "@/components/logo";
 import { NAV_LINKS } from "@/lib/site";
 import { cn } from "cn";
 
-export default function Navbar() {
+function NavbarContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
@@ -20,7 +20,7 @@ export default function Navbar() {
       <div className="container-page flex h-16 items-center justify-between gap-4 md:h-[4.5rem]">
         <Logo />
 
-        {/* Desktop links — always rendered, no auth checks yet */}
+        {/* Desktop links */}
         <nav aria-label="Main" className="items-center gap-1 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
@@ -39,8 +39,7 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Auth links — always rendered for the initial UI; conditional
-            rendering (Better Auth) will be added later */}
+        {/* Auth links */}
         <div className="hidden items-center gap-2 lg:flex">
           <Link
             href="/login"
@@ -49,6 +48,7 @@ export default function Navbar() {
             <LogIn className="size-4" aria-hidden="true" />
             Login
           </Link>
+
           <Link
             href="/register"
             className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-950 shadow-sm transition-colors hover:bg-amber-400"
@@ -73,7 +73,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu panel — same links, same order */}
+      {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-border/70 bg-background/95 backdrop-blur-md lg:hidden">
           <nav
@@ -96,7 +96,9 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
             <div className="my-2 h-px bg-border/70" aria-hidden="true" />
+
             <div className="flex gap-2 pb-2">
               <Link
                 href="/login"
@@ -105,6 +107,7 @@ export default function Navbar() {
               >
                 Login
               </Link>
+
               <Link
                 href="/register"
                 onClick={() => setMobileOpen(false)}
@@ -117,5 +120,13 @@ export default function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={<div className="h-16 md:h-[4.5rem]" />}>
+      <NavbarContent />
+    </Suspense>
   );
 }
