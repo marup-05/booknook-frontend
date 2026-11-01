@@ -1,16 +1,16 @@
+
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookCheck, Ban, Loader2 } from "lucide-react";
+import { BookCheck, Ban, Loader2, X } from "lucide-react";
 
 type BorrowButtonProps = {
   bookId: string;
   availableCopies: number;
 };
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BorrowButton({
   bookId,
@@ -20,6 +20,7 @@ export default function BorrowButton({
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
@@ -44,8 +45,8 @@ export default function BorrowButton({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          borrowerName: name,
-          borrowerEmail: email,
+          borrowerName: name.trim(),
+          borrowerEmail: email.trim(),
         }),
       });
 
@@ -60,6 +61,7 @@ export default function BorrowButton({
       setMessage("Book borrowed successfully!");
       setName("");
       setEmail("");
+      setShowForm(false);
 
       router.refresh();
     } catch (error) {
@@ -74,79 +76,107 @@ export default function BorrowButton({
     return (
       <button
         disabled
-        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-stone-200 px-6 py-4 font-semibold text-stone-500"
+        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-stone-200 px-5 py-3 text-sm font-semibold text-stone-500"
       >
-        <Ban size={19} />
+        <Ban size={18} />
         Not Available
       </button>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {availableCopies === 1 && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
           Only 1 copy left! Borrow it before it is gone.
         </p>
       )}
 
-      <div className="space-y-3">
-        <div>
-          <label
-            htmlFor="borrowerName"
-            className="mb-2 block text-sm font-semibold text-stone-700"
-          >
-            Your Name
-          </label>
-          <input
-            id="borrowerName"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
-          />
-        </div>
+      {!showForm ? (
+        <button
+          onClick={() => {
+            setShowForm(true);
+            setMessage("");
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
+        >
+          <BookCheck size={18} />
+          Borrow This Book
+        </button>
+      ) : (
+        <div className="space-y-3 rounded-xl border border-stone-200 bg-white p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-stone-900">
+              Borrower Information
+            </h3>
 
-        <div>
-          <label
-            htmlFor="borrowerEmail"
-            className="mb-2 block text-sm font-semibold text-stone-700"
-          >
-            Your Email
-          </label>
-          <input
-            id="borrowerEmail"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
-          />
-        </div>
-      </div>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="rounded-full p-1 text-stone-500 transition hover:bg-stone-100"
+              aria-label="Close borrow form"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-      <button
-        onClick={handleBorrow}
-        disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-700 px-6 py-4 font-semibold text-white shadow-lg shadow-amber-900/10 transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? (
-          <>
-            <Loader2 size={19} className="animate-spin" />
-            Processing...
-          </>
-        ) : (
-          <>
-            <BookCheck size={19} />
-            Borrow This Book
-          </>
-        )}
-      </button>
+          <div>
+            <label
+              htmlFor="borrowerName"
+              className="mb-1.5 block text-xs font-semibold text-stone-700"
+            >
+              Your Name
+            </label>
+            <input
+              id="borrowerName"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="borrowerEmail"
+              className="mb-1.5 block text-xs font-semibold text-stone-700"
+            >
+              Your Email
+            </label>
+            <input
+              id="borrowerEmail"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+            />
+          </div>
+
+          <button
+            onClick={handleBorrow}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <BookCheck size={18} />
+                Confirm Borrow
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {message && (
         <p
-          className={`rounded-lg px-4 py-3 text-sm ${
+          className={`rounded-lg px-3 py-2.5 text-sm ${
             success
               ? "bg-green-50 text-green-700"
               : "bg-red-50 text-red-700"
