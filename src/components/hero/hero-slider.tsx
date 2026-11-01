@@ -8,7 +8,6 @@ import {
   Autoplay,
   Keyboard,
   Navigation,
-  Pagination,
 } from "swiper/modules";
 
 import "swiper/css/bundle";
@@ -69,7 +68,7 @@ export default function HeroSlider() {
   return (
     <section aria-label="Featured highlights" className="relative">
       <Swiper
-        modules={[Autoplay, Navigation, Pagination, Keyboard]}
+        modules={[Autoplay, Navigation, Keyboard]}
         className="hero-swiper h-full"
         effect="slide"
         speed={AUTOPLAY_SPEED}
@@ -83,9 +82,6 @@ export default function HeroSlider() {
         }}
         keyboard={{
           enabled: true,
-        }}
-        pagination={{
-          clickable: true,
         }}
         navigation={{
           prevEl: ".hero-swiper-prev",
