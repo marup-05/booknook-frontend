@@ -1,5 +1,7 @@
+
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
 type Book = {
   _id: string;
@@ -25,14 +27,14 @@ async function getBooks(): Promise<Book[]> {
       throw new Error("Failed to fetch books");
     }
 
-    return res.json();
+    return await res.json();
   } catch (error) {
-    console.error("Books fetch error:", error);
+    console.error("Failed to fetch books:", error);
     return [];
   }
 }
 
-export default async function BooksPage() {
+async function BooksContent() {
   const books = await getBooks();
 
   return (
@@ -71,7 +73,6 @@ export default async function BooksPage() {
         {/* Books Grid */}
         {books.length > 0 ? (
           <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-
             {books.map((book) => (
               <article
                 key={book._id}
@@ -121,16 +122,18 @@ export default async function BooksPage() {
                         Availability
                       </p>
 
-                      <p className={`mt-1 text-sm font-semibold ${
-                        book.availableCopies > 0
-                          ? "text-emerald-700"
-                          : "text-red-600"
-                      }`}>
-                        {book.availableCopies > 0    
-                          ? `${book.availableCopies} Copies`    
+                      <p
+                        className={`mt-1 text-sm font-semibold ${
+                          book.availableCopies > 0
+                            ? "text-emerald-700"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {book.availableCopies > 0
+                          ? `${book.availableCopies} Copies`
                           : "Currently Unavailable"}
                       </p>
-                    </div>    
+                    </div>
 
                     <span className="text-xs text-[#928879]">
                       Total: {book.totalCopies}
@@ -148,7 +151,6 @@ export default async function BooksPage() {
                 </div>
               </article>
             ))}
-
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-[#d9cebd] bg-[#fffefa] px-5 py-16 text-center">
@@ -168,8 +170,21 @@ export default async function BooksPage() {
             </Link>
           </div>
         )}
-
       </div>
     </main>
+  );
+}
+
+export default function BooksPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#faf8f3]">
+          <p className="text-[#a97842]">Loading books...</p>
+        </div>
+      }
+    >
+      <BooksContent />
+    </Suspense>
   );
 }
