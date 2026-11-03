@@ -35,7 +35,6 @@ import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
   const router = useRouter();
-
   const { data: session, isPending } = authClient.useSession();
 
   const [loggingOut, setLoggingOut] = useState(false);
@@ -49,20 +48,34 @@ export default function ProfilePage() {
   }, [isPending, session, loggingOut, router]);
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+
     try {
       setLoggingOut(true);
 
-      await authClient.signOut();
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        throw new Error(error.message || "Logout failed.");
+      }
 
       toast.success("Logged out successfully!", {
         description: "You have been logged out of BookNook.",
       });
 
-      window.location.replace("/");
+      setTimeout(() => {
+        router.replace("/");
+        router.refresh();
+      }, 1000);
     } catch (error) {
       console.error("Logout failed:", error);
 
-      toast.error("Logout failed. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Logout failed. Please try again.",
+      );
+
       setLoggingOut(false);
     }
   };
