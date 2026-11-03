@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,11 +28,10 @@ function MyBorrowsContent() {
 
     const loadBorrows = async () => {
       try {
-        // Get JWT token from Better Auth
         const { data, error } = await authClient.token();
 
         if (error || !data?.token) {
-          throw new Error("Failed to get authentication token.");
+          throw new Error("Failed to get authentication token. Please login again.");
         }
 
         const response = await fetch(`${API_URL}/my-borrows`, {
@@ -74,14 +72,25 @@ function MyBorrowsContent() {
     setReturningId(borrowId);
 
     try {
+      const { data: tokenData, error: tokenError } = await authClient.token();
+
+      if (tokenError || !tokenData?.token) {
+        throw new Error("Unable to get authentication token. Please login again.");
+      }
+
       const response = await fetch(`${API_URL}/return/${borrowId}`, {
         method: "PATCH",
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenData.token}`,
+        },
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.message);
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to return book.");
+      }
 
       toast.success(data.message || "Book returned successfully!");
 
@@ -125,7 +134,6 @@ function MyBorrowsContent() {
         </div>
       )}
 
-      {/* Mobile: borrow cards */}
       {borrows.length > 0 && (
         <div className="space-y-4 md:hidden">
           {borrows.map((borrow) => (
@@ -199,7 +207,6 @@ function MyBorrowsContent() {
         </div>
       )}
 
-      {/* Tablet/Desktop: table */}
       {borrows.length > 0 && (
         <div className="hidden overflow-x-auto rounded-xl border md:block">
           <table className="w-full min-w-[750px] text-left">
