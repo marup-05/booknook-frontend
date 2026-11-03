@@ -55,11 +55,21 @@ export default function BorrowButton({
     setLoading(true);
 
     try {
+      // Get JWT token from Better Auth
+      const { data: tokenData, error: tokenError } =
+        await authClient.token();
+
+      if (tokenError || !tokenData?.token) {
+        toast.error("Unable to get authentication token. Please login again.");
+        return;
+      }
+
+      // Send borrow request with JWT token
       const response = await fetch(`${API_URL}/borrow/${bookId}`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenData.token}`,
         },
       });
 

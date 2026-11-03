@@ -1,10 +1,10 @@
-
 "use client";
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogIn, Menu, X, UserRound } from "lucide-react";
+
 import Logo from "@/components/logo";
 import ThemeToggle from "@/components/theme-toggle";
 import { NAV_LINKS } from "@/lib/site";
@@ -27,12 +27,18 @@ function NavbarContent() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const closeMobileMenu = () => setMobileOpen(false);
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-4 md:h-[4.5rem]">
         <Logo />
 
-        <nav aria-label="Main" className="items-center gap-1 lg:flex">
+        {/* Desktop Navigation */}
+        <nav
+          aria-label="Main"
+          className="hidden items-center gap-1 lg:flex"
+        >
           {!isPending &&
             visibleLinks.map((link) => (
               <Link
@@ -51,6 +57,7 @@ function NavbarContent() {
             ))}
         </nav>
 
+        {/* Desktop Actions */}
         <div className="hidden items-center gap-2 lg:flex">
           <ThemeToggle />
 
@@ -58,10 +65,7 @@ function NavbarContent() {
             (isLoggedIn ? (
               <Link
                 href="/profile"
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-colors",
-                  "bg-amber-500 text-stone-950 hover:bg-amber-400"
-                )}
+                className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-950 shadow-sm transition-colors hover:bg-amber-400"
               >
                 <UserRound className="size-4" />
                 Profile
@@ -86,6 +90,7 @@ function NavbarContent() {
             ))}
         </div>
 
+        {/* Mobile Actions */}
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
 
@@ -93,20 +98,26 @@ function NavbarContent() {
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            className="grid size-9 place-items-center rounded-lg text-foreground transition-colors hover:bg-muted"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             {mobileOpen ? (
-              <X className="size-5" aria-hidden="true" />
+              <X className="size-4" aria-hidden="true" />
             ) : (
-              <Menu className="size-5" aria-hidden="true" />
+              <Menu className="size-4" aria-hidden="true" />
             )}
+            Menu
           </button>
         </div>
       </div>
 
+      {/* Mobile Dropdown */}
       {mobileOpen && (
-        <div className="border-t border-border/70 bg-background/95 backdrop-blur-md lg:hidden">
+        <div
+          id="mobile-navigation"
+          className="border-t border-border/70 bg-background/95 backdrop-blur-md lg:hidden"
+        >
           <nav
             aria-label="Mobile"
             className="container-page flex flex-col gap-1 py-3"
@@ -116,7 +127,7 @@ function NavbarContent() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobileMenu}
                   aria-current={isActive(link.href) ? "page" : undefined}
                   className={cn(
                     "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
@@ -132,7 +143,7 @@ function NavbarContent() {
             {!isPending && isLoggedIn && (
               <Link
                 href="/profile"
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobileMenu}
                 className={cn(
                   "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive("/profile")
@@ -146,12 +157,15 @@ function NavbarContent() {
 
             {!isPending && !isLoggedIn && (
               <>
-                <div className="my-2 h-px bg-border/70" aria-hidden="true" />
+                <div
+                  className="my-2 h-px bg-border/70"
+                  aria-hidden="true"
+                />
 
                 <div className="flex gap-2 pb-2">
                   <Link
                     href="/login"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobileMenu}
                     className="flex-1 rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium text-foreground transition-colors hover:bg-muted"
                   >
                     Login
@@ -159,7 +173,7 @@ function NavbarContent() {
 
                   <Link
                     href="/register"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobileMenu}
                     className="flex-1 rounded-full bg-amber-500 px-4 py-2.5 text-center text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400"
                   >
                     Register
