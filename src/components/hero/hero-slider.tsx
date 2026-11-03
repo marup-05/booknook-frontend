@@ -3,12 +3,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "motion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import {
-  Autoplay,
-  Keyboard,
-  Navigation,
-} from "swiper/modules";
+import { Autoplay, Keyboard, Navigation } from "swiper/modules";
 
 import "swiper/css/bundle";
 
@@ -80,9 +77,7 @@ export default function HeroSlider() {
           waitForTransition: true,
           reverseDirection: false,
         }}
-        keyboard={{
-          enabled: true,
-        }}
+        keyboard={{ enabled: true }}
         navigation={{
           prevEl: ".hero-swiper-prev",
           nextEl: ".hero-swiper-next",
@@ -91,7 +86,6 @@ export default function HeroSlider() {
         {SLIDES.map((slide, index) => (
           <SwiperSlide key={slide.id}>
             <div className="relative overflow-hidden bg-stone-950">
-              {/* Background image */}
               <Image
                 src={slide.image.src}
                 alt={slide.image.alt}
@@ -101,48 +95,67 @@ export default function HeroSlider() {
                 className="object-cover object-center"
               />
 
-              {/* Readability gradient */}
               <div
                 aria-hidden="true"
                 className={cn("absolute inset-0", slide.overlay)}
               />
 
-              {/* Slide content */}
-              <div className="container-page relative flex min-h-[640px] flex-col items-center justify-center py-20 pb-28 text-center md:min-h-[680px] lg:min-h-[700px] lg:py-24">
-                <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-amber-300 backdrop-blur-sm">
-                  {slide.eyebrow}
-                </p>
-
-                <h1 className="mt-6 max-w-3xl font-serif text-4xl leading-tight font-bold text-white drop-shadow-sm sm:text-5xl lg:text-6xl">
-                  {slide.title}
-                </h1>
-
-                <Link
-                  href="/books"
-                  className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber-500 px-7 text-sm font-semibold text-stone-950 shadow-lg shadow-amber-950/40 transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
+              <div className="container-page relative flex min-h-[540px] flex-col items-center justify-center py-16 pb-28 text-center sm:min-h-[640px] sm:py-20 md:min-h-[680px] lg:min-h-[700px] lg:py-24">
+                <motion.p
+                  key={`${slide.id}-eyebrow`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-amber-300 backdrop-blur-sm"
                 >
-                  Browse Books
+                  {slide.eyebrow}
+                </motion.p>
 
-                  <svg
-                    className="size-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
+                <motion.h1
+                  key={`${slide.id}-title`}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                  className="mt-6 max-w-3xl font-serif text-4xl leading-tight font-bold text-white drop-shadow-sm sm:text-5xl lg:text-6xl"
+                >
+                  {slide.title}
+                </motion.h1>
+
+                <motion.div
+                  key={`${slide.id}-button`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="mt-8"
+                >
+                  <Link
+                    href="/books"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber-500 px-7 text-sm font-semibold text-stone-950 shadow-lg shadow-amber-950/40 transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
                   >
-                    <path d="M5 12h14" />
-                    <path d="m13 6 6 6-6 6" />
-                  </svg>
-                </Link>
+                    Browse Books
+
+                    <svg
+                      className="size-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m13 6 6 6-6 6" />
+                    </svg>
+                  </Link>
+                </motion.div>
               </div>
             </div>
           </SwiperSlide>
         ))}
 
-        {/* Previous button */}
         <button
           type="button"
           aria-label="Previous slide"
@@ -162,7 +175,6 @@ export default function HeroSlider() {
           </svg>
         </button>
 
-        {/* Next button */}
         <button
           type="button"
           aria-label="Next slide"

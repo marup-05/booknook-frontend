@@ -1,8 +1,8 @@
-
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import {
   ArrowLeft,
   BookOpen,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import BorrowButton from "@/components/books/borrow-button";
+import { auth } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,7 +33,20 @@ type Book = {
 
 async function getBook(id: string): Promise<Book | null> {
   try {
+    if (!API_URL) throw new Error("API URL is not configured.");
+
+    const { token } = await auth.api.getToken({
+      headers: await headers(),
+    });
+
+    if (!token) {
+      throw new Error("Authentication token not found.");
+    }
+
     const response = await fetch(`${API_URL}/books/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       cache: "no-store",
     });
 
@@ -64,21 +78,20 @@ async function BookDetailsContent({
   const isAvailable = book.availableCopies > 0;
 
   return (
-    <main className="min-h-screen bg-[#faf8f3] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
       <div className="mx-auto max-w-4xl">
         <Link
           href="/books"
-          className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-stone-600 transition hover:text-amber-800"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition hover:text-amber-700 dark:hover:text-amber-400"
         >
           <ArrowLeft size={17} />
           Back to All Books
         </Link>
 
-        <section className="overflow-hidden rounded-2xl border border-stone-200 bg-[#fffefa] shadow-md shadow-stone-900/5">
+        <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-md shadow-black/5">
           <div className="grid gap-6 p-5 sm:grid-cols-[220px_1fr] sm:gap-8 sm:p-7">
-            {/* Book Cover */}
             <div className="flex justify-center">
-              <div className="relative h-[260px] w-[190px] overflow-hidden rounded-lg bg-[#f0ece3] shadow-md">
+              <div className="relative h-[260px] w-[190px] overflow-hidden rounded-lg bg-muted shadow-md">
                 {book.imageUrl ? (
                   <Image
                     src={book.imageUrl}
@@ -90,91 +103,107 @@ async function BookDetailsContent({
                     className="object-contain"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-stone-400">
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
                     <BookOpen size={48} />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Book Information */}
             <div className="flex flex-col">
               <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                   {book.category}
                 </span>
 
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-bold ${
                     isAvailable
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
+                      ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+                      : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
                   }`}
                 >
                   {isAvailable ? "Available" : "Unavailable"}
                 </span>
 
-                <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700">
+                <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 dark:text-amber-400">
                   <Star size={15} fill="currentColor" />
                   {book.rating ?? "N/A"}
                 </span>
               </div>
 
-              <h1 className="text-2xl font-bold leading-tight text-stone-900 sm:text-3xl">
+              <h1 className="text-2xl font-bold leading-tight text-foreground sm:text-3xl">
                 {book.title}
               </h1>
 
-              <p className="mt-2 text-sm text-stone-500">
-                by <span className="font-semibold text-stone-800">{book.author}</span>
+              <p className="mt-2 text-sm text-muted-foreground">
+                by{" "}
+                <span className="font-semibold text-foreground">
+                  {book.author}
+                </span>
               </p>
 
-              <div className="my-5 border-t border-stone-200" />
+              <div className="my-5 border-t border-border" />
 
-              <h2 className="mb-2 text-sm font-bold text-stone-900">
+              <h2 className="mb-2 text-sm font-bold text-foreground">
                 About This Book
               </h2>
 
-              <p className="text-sm leading-6 text-stone-600">
+              <p className="text-sm leading-6 text-muted-foreground">
                 {book.description || "No description available for this book."}
               </p>
 
-              {/* Copies */}
               <div className="mt-5 flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 rounded-lg bg-stone-100 px-4 py-3">
-                  <BookCopy size={18} className="text-amber-700" />
+                <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-3">
+                  <BookCopy
+                    size={18}
+                    className="text-amber-700 dark:text-amber-400"
+                  />
                   <div>
-                    <p className="text-xs text-stone-500">Available Copies</p>
-                    <p className="font-bold text-stone-900">
+                    <p className="text-xs text-muted-foreground">
+                      Available Copies
+                    </p>
+                    <p className="font-bold text-foreground">
                       {book.availableCopies}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-lg bg-stone-100 px-4 py-3">
-                  <BookOpen size={18} className="text-amber-700" />
+                <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-3">
+                  <BookOpen
+                    size={18}
+                    className="text-amber-700 dark:text-amber-400"
+                  />
                   <div>
-                    <p className="text-xs text-stone-500">Total Copies</p>
-                    <p className="font-bold text-stone-900">
+                    <p className="text-xs text-muted-foreground">
+                      Total Copies
+                    </p>
+                    <p className="font-bold text-foreground">
                       {book.totalCopies}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Added By */}
-              <div className="mt-5 rounded-lg border border-stone-200 bg-[#faf8f3] p-4">
-                <h2 className="mb-3 text-sm font-bold text-stone-900">
+              <div className="mt-5 rounded-lg border border-border bg-muted/50 p-4">
+                <h2 className="mb-3 text-sm font-bold text-foreground">
                   Added By
                 </h2>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-stone-700">
-                    <UserRound size={16} className="text-amber-700" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <UserRound
+                      size={16}
+                      className="text-amber-700 dark:text-amber-400"
+                    />
                     <span>{book.addedByName || "Unknown"}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-stone-700">
-                    <Mail size={16} className="shrink-0 text-amber-700" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail
+                      size={16}
+                      className="shrink-0 text-amber-700 dark:text-amber-400"
+                    />
                     <span className="break-all">
                       {book.addedByEmail || "Not provided"}
                     </span>
@@ -182,7 +211,6 @@ async function BookDetailsContent({
                 </div>
               </div>
 
-              {/* Borrow */}
               <div className="mt-5">
                 <BorrowButton
                   bookId={book._id}
@@ -193,7 +221,7 @@ async function BookDetailsContent({
           </div>
         </section>
 
-        <p className="mt-5 text-center text-xs text-stone-400">
+        <p className="mt-5 text-center text-xs text-muted-foreground">
           BookNook · Your next chapter starts here.
         </p>
       </div>
@@ -209,8 +237,8 @@ export default function BookDetailsPage({
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#faf8f3]">
-          <p className="text-sm font-medium text-stone-500">
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <p className="text-sm font-medium text-muted-foreground">
             Loading book details...
           </p>
         </div>

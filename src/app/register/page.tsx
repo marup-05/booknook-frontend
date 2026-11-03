@@ -99,8 +99,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container-page flex flex-col items-center py-14 md:py-20">
-      <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card p-8 shadow-sm sm:p-10">
+    <div className="container-page flex flex-col items-center py-10 sm:py-14 md:py-20">
+      <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card p-5 shadow-sm sm:p-10">
         <div className="text-center">
           <div className="flex justify-center">
             <Logo />
