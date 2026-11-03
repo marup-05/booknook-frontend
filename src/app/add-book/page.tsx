@@ -50,7 +50,9 @@ export default function AddBookPage() {
     setLoading(true);
 
     try {
-      if (!API_URL) throw new Error("API URL is not configured.");
+      if (!API_URL) {
+        throw new Error("API URL is not configured.");
+      }
 
       // Get JWT token
       const { data, error } = await authClient.token();
@@ -78,7 +80,6 @@ export default function AddBookPage() {
       });
 
       router.push("/books");
-      router.refresh();
     } catch (err) {
       console.error("Add book error:", err);
 
@@ -89,6 +90,7 @@ export default function AddBookPage() {
 
       setError(errorMessage);
       toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
