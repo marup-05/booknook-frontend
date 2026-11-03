@@ -30,7 +30,6 @@ export default function LoginPage() {
       params.get("redirect") ||
       "/";
 
-    // Only allow internal application routes.
     return callbackURL.startsWith("/") && !callbackURL.startsWith("//")
       ? callbackURL
       : "/";
@@ -50,7 +49,6 @@ export default function LoginPage() {
       const { error } = await authClient.signIn.email({
         email: email.trim(),
         password,
-        callbackURL: getCallbackURL(),
       });
 
       if (error) {
@@ -60,12 +58,12 @@ export default function LoginPage() {
 
       toast.success("Login successful!");
 
-      router.push(getCallbackURL());
-      router.refresh();
+      setTimeout(() => {
+        window.location.assign(getCallbackURL());
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Something went wrong. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };
