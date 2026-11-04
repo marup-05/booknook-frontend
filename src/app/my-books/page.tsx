@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
@@ -78,6 +77,9 @@ function MyBooksContent() {
   const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    // Store the form reference before the first await
+    const form = event.currentTarget;
+
     if (!editingBook) return;
 
     setSaving(true);
@@ -90,7 +92,7 @@ function MyBooksContent() {
         throw new Error("Failed to get authentication token.");
       }
 
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
 
       const response = await fetch(`${API_URL}/books/${editingBook._id}`, {
         method: "PATCH",
